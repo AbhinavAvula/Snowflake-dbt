@@ -1,0 +1,3 @@
+CREATE STAGE IF NOT EXISTS SALES.BRONZE.SALES_BRONZE_STAGE
+URL = 's3://snowflake-dbt-s3-bkt/sales/bronze/'
+STORAGE_INTEGRATION = s3_integration;
