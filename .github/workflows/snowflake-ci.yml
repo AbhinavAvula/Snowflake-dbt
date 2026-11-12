@@ -27,3 +27,11 @@ jobs:
         env:
           SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
         run: snow connection test -x
+
+      - name: Deploy S3 Storage Integration
+        env:
+          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+          SNOWFLAKE_ROLE: GITHUB_DEPLOY_ROLE
+        run: |
+          snow sql -f snowflake_dbt_project/infrastructure/integrations/s3_integration.sql -x
+
