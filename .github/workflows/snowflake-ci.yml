@@ -43,4 +43,20 @@ jobs:
         run: |
           snow sql -f snowflake_dbt_project/infrastructure/stages/sales/bronze/sales_bronze_stage.sql -x
 
+    
+      - name: Deploy Sales Bronze File Format
+        env:
+          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+          SNOWFLAKE_ROLE: GITHUB_DEPLOY_ROLE
+        run: |
+          snow sql -f snowflake_dbt_project/infrastructure/file_formats/sales/bronze/parquet_format.sql -x
+
+      - name: Deploy Sales Bronze Table
+        env:
+          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+          SNOWFLAKE_ROLE: GITHUB_DEPLOY_ROLE
+        run: |
+          snow sql -f snowflake_dbt_project/infrastructure/tables/sales/bronze/create_raw_sales.sql -x
+
+
 
