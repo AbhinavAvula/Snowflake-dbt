@@ -59,4 +59,11 @@ jobs:
           snow sql -f snowflake_dbt_project/infrastructure/tables/sales/bronze/create_raw_sales.sql -x
 
 
+      - name: Deploy Sales Bronze Ingestion Task
+        env:
+          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+          SNOWFLAKE_ROLE: GITHUB_DEPLOY_ROLE
+        run: |
+          snow sql -f snowflake_dbt_project/infrastructure/tasks/sales/bronze/load_raw_sales_task.sql -x
+
 
