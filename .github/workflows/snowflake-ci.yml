@@ -35,3 +35,12 @@ jobs:
         run: |
           snow sql -f snowflake_dbt_project/infrastructure/integrations/s3_integration.sql -x
 
+    
+      - name: Deploy Sales Bronze External Stage
+        env:
+          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+          SNOWFLAKE_ROLE: GITHUB_DEPLOY_ROLE
+        run: |
+          snow sql -f snowflake_dbt_project/infrastructure/stages/sales_bronze_stage.sql -x
+
+
