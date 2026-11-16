@@ -33,9 +33,16 @@ clean-targets:         # directories to be removed by `dbt clean`
 models:
   snowflake_dbt_project:
     sales:
+      +database: SALES_DB
+
       bronze:
+        +schema: BRONZE_SCM
         +materialized: table
+
       silver:
+        +schema: SILVER_SCM
         +materialized: table
+
       gold:
+        +schema: GOLD_SCM
         +materialized: table

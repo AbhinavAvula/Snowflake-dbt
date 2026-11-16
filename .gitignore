@@ -12,7 +12,6 @@
 # Credentials and environment variables
 .env
 .env.*
-**/profiles.yml
 
 # OS and editor files
 .DS_Store

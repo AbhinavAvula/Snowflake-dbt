@@ -1,0 +1,16 @@
+snowflake_dbt_project:
+  target: default
+
+  outputs:
+    default:
+      type: snowflake
+      account: "{{ env_var('SNOWFLAKE_ACCOUNT') }}"
+      role: GITHUB_DEPLOY_ROLE
+      warehouse: COMPUTE_WH
+      database: SALES_DB
+      schema: PUBLIC
+      threads: 4
+
+      method: workload_identity
+      workload_identity_provider: OIDC
+      token: "{{ env_var('SNOWFLAKE_TOKEN') }}"
