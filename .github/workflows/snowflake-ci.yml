@@ -111,5 +111,14 @@ jobs:
             -x
 
 
+      
+      - name: Deploy Sales dbt Execution Task
+        env:
+          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+          SNOWFLAKE_ROLE: GITHUB_DEPLOY_ROLE
+        run: |
+          snow sql -f snowflake_dbt_project/infrastructure/tasks/sales/bronze/run_sales_dbt_task.sql -x
+
+
 
 
