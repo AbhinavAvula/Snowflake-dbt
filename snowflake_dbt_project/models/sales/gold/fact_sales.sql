@@ -1,0 +1,9 @@
+SELECT
+    ORDER_ID,
+    PRODUCT,
+    QUANTITY,
+    UNIT_PRICE,
+    TOTAL_AMOUNT,
+    ORDER_DATE,
+    EXTRACT(YEAR FROM ORDER_DATE) AS YEAR
+FROM {{ ref('clean_sales') }}
