@@ -61,7 +61,13 @@ jobs:
 
       - name: Deploy Sales DQ Schema
         run: |
-          snow sql -f snowflake_dbt_project/infrastructure/schemas/sales/dq_schema.sql -x
+          snow sql -f snowflake_dbt_project/infrastructure/schemas/sales/dq_scm.sql -x
+
+
+      - name: Deploy Sales Silver Quarantine Table
+        run: |
+          snow sql -f snowflake_dbt_project/infrastructure/tables/sales/dq/silver_quarantine.sql -x
+
 
 
 
