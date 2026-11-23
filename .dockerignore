@@ -1,0 +1,34 @@
+# Git metadata and CI/CD
+.git/
+.github/
+
+# Local secrets and authentication
+**/.env
+**/.env.*
+**/profiles.yml
+**/*.p8
+**/*.pem
+**/*_rsa_key.pub
+**/credentials/
+
+# Airflow runtime data
+airflow/logs/
+airflow/config/
+airflow/plugins/__pycache__/
+
+# dbt generated files
+**/target/
+**/dbt_packages/
+**/logs/
+**/dbt_packages.yml
+
+# Python temporary files
+**/__pycache__/
+**/*.pyc
+**/.venv/
+**/venv/
+
+# Local development files
+.vscode/
+.idea/
+``

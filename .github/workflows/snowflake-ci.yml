@@ -88,13 +88,5 @@ jobs:
           dbt debug --profiles-dir .
 
 
-      - name: Run Sales Silver and Gold dbt Models
-        env:
-          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
-        run: |
-          cd snowflake_dbt_project
-          dbt run --select path:models/sales --profiles-dir .
-
-
 
 

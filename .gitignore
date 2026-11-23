@@ -17,3 +17,9 @@
 .DS_Store
 Thumbs.db
 .vscode/
+
+# Airflow local environment and runtime files
+airflow/.env
+airflow/logs/
+airflow/config/airflow.cfg
+airflow/config/dbt/profiles.yml
