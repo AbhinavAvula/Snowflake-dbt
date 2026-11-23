@@ -5,7 +5,7 @@ SELECT
     UNIT_PRICE,
     ORDER_DATE,
     QUANTITY * UNIT_PRICE AS TOTAL_AMOUNT
-FROM {{ source('sales_bronze', 'RAW_SALES') }}
-WHERE ORDER_ID IS NOT NULL
-  AND QUANTITY > 0
-  AND UNIT_PRICE >= 0
+
+FROM {{ ref('sales_dq_validation') }}
+
+WHERE DQ_STATUS = 'VALID'
