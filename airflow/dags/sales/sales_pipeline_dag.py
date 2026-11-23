@@ -24,6 +24,11 @@ with DAG(
                 FORMAT_NAME = 'SALES_DB.BRONZE_SCM.PARQUET_FORMAT'
             )
             MATCH_BY_COLUMN_NAME = CASE_INSENSITIVE
+            INCLUDE_METADATA = (
+                SOURCE_FILE = METADATA$FILENAME,
+                SOURCE_FILE_ROW_NUMBER = METADATA$FILE_ROW_NUMBER,
+                INGESTED_AT = METADATA$START_SCAN_TIME
+            )
             ON_ERROR = ABORT_STATEMENT;
         """,
     )
