@@ -60,11 +60,17 @@ jobs:
 
 
       - name: Deploy Sales DQ Schema
+        env:
+          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+          SNOWFLAKE_ROLE: GITHUB_DEPLOY_ROLE
         run: |
           snow sql -f snowflake_dbt_project/infrastructure/schemas/sales/dq_scm.sql -x
 
 
       - name: Deploy Sales Silver Quarantine Table
+        env:
+          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+          SNOWFLAKE_ROLE: GITHUB_DEPLOY_ROLE
         run: |
           snow sql -f snowflake_dbt_project/infrastructure/tables/sales/dq/silver_quarantine.sql -x
 
