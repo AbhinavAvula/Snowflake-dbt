@@ -4,77 +4,76 @@ on:
   push:
     branches:
       - main
+    paths:
+      - "snowflake_dbt_project/infrastructure/**"
+      - ".github/workflows/snowflake-ci.yml"
 
 permissions:
   id-token: write
   contents: read
 
 jobs:
-  test-connection:
+  deploy-infrastructure:
     runs-on: ubuntu-latest
 
+    env:
+      SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+      SNOWFLAKE_ROLE: GITHUB_DEPLOY_ROLE
+
     steps:
+      # Step 1: Download repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Step 2: Install Snowflake CLI with OIDC
       - name: Install Snowflake CLI with OIDC
         uses: snowflakedb/snowflake-actions@v3
         with:
           use-oidc: true
           cli-version: "3.16"
 
+      # Step 3: Validate Snowflake connection
       - name: Test Snowflake connection
-        env:
-          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
         run: snow connection test -x
 
-      - name: Deploy S3 Storage Integration
-        env:
-          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
-          SNOWFLAKE_ROLE: GITHUB_DEPLOY_ROLE
+      # Step 4: Discover and deploy infrastructure SQL
+      - name: Deploy Snowflake Infrastructure
+        shell: bash
         run: |
-          snow sql -f snowflake_dbt_project/infrastructure/integrations/s3_integration.sql -x
+          set -euo pipefail
 
-    
-      - name: Deploy Sales Bronze External Stage
-        env:
-          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
-          SNOWFLAKE_ROLE: GITHUB_DEPLOY_ROLE
-        run: |
-          snow sql -f snowflake_dbt_project/infrastructure/stages/sales/bronze/sales_bronze_stage.sql -x
+          BASE="snowflake_dbt_project/infrastructure"
 
-    
-      - name: Deploy Sales Bronze File Format
-        env:
-          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
-          SNOWFLAKE_ROLE: GITHUB_DEPLOY_ROLE
-        run: |
-          snow sql -f snowflake_dbt_project/infrastructure/file_formats/sales/bronze/parquet_format.sql -x
+          deploy_group() {
+            local directory="$1"
 
-      - name: Deploy Sales Bronze Table
-        env:
-          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
-          SNOWFLAKE_ROLE: GITHUB_DEPLOY_ROLE
-        run: |
-          snow sql -f snowflake_dbt_project/infrastructure/tables/sales/bronze/create_raw_sales.sql -x
+            if [ ! -d "$directory" ]; then
+              return
+            fi
 
+            while IFS= read -r -d '' file; do
+              echo "Deploying: $file"
+              snow sql -f "$file" -x
+            done < <(
+              find "$directory" -type f -name "*.sql" -print0 |
+              sort -z
+            )
+          }
 
-      - name: Deploy Sales DQ Schema
-        env:
-          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
-          SNOWFLAKE_ROLE: GITHUB_DEPLOY_ROLE
-        run: |
-          snow sql -f snowflake_dbt_project/infrastructure/schemas/sales/dq_scm.sql -x
+          # Execute infrastructure in dependency order
+          echo "Deploying storage integrations"
+          deploy_group "$BASE/integrations"
 
+          echo "Deploying schemas"
+          deploy_group "$BASE/schemas"
 
-      - name: Deploy Sales Silver Quarantine Table
-        env:
-          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
-          SNOWFLAKE_ROLE: GITHUB_DEPLOY_ROLE
-        run: |
-          snow sql -f snowflake_dbt_project/infrastructure/tables/sales/dq/silver_quarantine.sql -x
+          echo "Deploying file formats"
+          deploy_group "$BASE/file_formats"
 
+          echo "Deploying external stages"
+          deploy_group "$BASE/stages"
 
+          echo "Deploying tables"
+          deploy_group "$BASE/tables"
 
-
-
+          echo "Snowflake infrastructure deployment completed"
