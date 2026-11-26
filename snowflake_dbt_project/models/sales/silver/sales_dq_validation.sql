@@ -1,14 +1,43 @@
+
+{{
+    config(
+        materialized='incremental',
+        incremental_strategy='merge',
+        unique_key='SOURCE_ROW_ID',
+        on_schema_change='append_new_columns'
+    )
+}}
+
 WITH source_data AS (
-    SELECT *
+
+    SELECT
+        *,
+        SHA2(
+            SOURCE_FILE || '|' ||
+            SOURCE_FILE_ROW_NUMBER::VARCHAR,
+            256
+        ) AS SOURCE_ROW_ID
+
     FROM {{ source('sales_bronze', 'RAW_SALES') }}
+
+    -- Process only records belonging to this Airflow execution
+    WHERE BATCH_ID = (
+        SELECT BATCH_ID
+        FROM SALES_DB.CONTROL_SCM.PIPELINE_BATCHES
+        WHERE DAG_ID = 'sales_pipeline'
+          AND AIRFLOW_RUN_ID =
+              '{{ var("airflow_run_id") | replace("'", "''") }}'
+    )
+      AND SOURCE_FILE IS NOT NULL
+      AND SOURCE_FILE_ROW_NUMBER IS NOT NULL
 ),
 
 validate_records AS (
+
     SELECT
         *,
 
-        -- Collect all validation failures for each record
-        
+        -- Collect all business-rule violations
         ARRAY_CONSTRUCT_COMPACT(
             IFF(ORDER_ID IS NULL,
                 'NULL_ORDER_ID', NULL),
@@ -25,7 +54,6 @@ validate_records AS (
             IFF(ORDER_DATE IS NULL,
                 'INVALID_ORDER_DATE', NULL)
         ) AS ERROR_CODES
-
 
     FROM source_data
 )
